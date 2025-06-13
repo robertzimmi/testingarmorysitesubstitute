@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | 13Dominate</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen px-4">
+
+  <!-- ✅ Flash Toasts -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="toast px-4 py-3 rounded shadow-md text-white transition-opacity duration-500
+            {% if category == 'success' %}bg-green-600
+            {% elif category == 'error' %}bg-red-600
+            {% elif category == 'warning' %}bg-yellow-500 text-black
+            {% else %}bg-gray-800{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Formulário de login -->
+  <div class="w-full max-w-md bg-gray-800 rounded-lg shadow-lg p-8 space-y-6">
+    <div class="text-center">
+      <img src="{{ url_for('static', filename='img/13Dominate_Logo.svg') }}" alt="Logo" class="mx-auto h-12">
+      <h2 class="text-2xl font-bold mt-4">Entrar na conta</h2>
+      <!-- DEBUG -->
+       <p>Usuário cookie: {{ usuario_cookie }}</p>
+<p>Lembrar: {{ lembrar }}</p>
+    </div>
+
+    <form action="{{ url_for('auth.login') }}" method="POST" class="space-y-4">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div>
+        <label class="block text-sm text-gray-300">Usuário</label>
+        <input type="text"
+               name="usuario"
+               value="{{ usuario_cookie }}"
+               required
+               class="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-red-600">
+      </div>
+
+      <div>
+        <label class="block text-sm text-gray-300">Senha</label>
+        <div class="relative">
+          <input id="senha" type="password" name="senha" required
+                 class="w-full px-4 py-2 pr-10 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-red-600">
+          <button type="button" onclick="toggleSenha()" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-white">
+            <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <input type="checkbox" id="lembrar" name="lembrar"
+               class="text-red-600 focus:ring-red-600 bg-gray-700 border-gray-600 rounded"
+               {% if lembrar %} checked {% endif %}>
+        <label for="lembrar" class="text-sm text-gray-300">Lembrar login</label>
+      </div>
+
+      <div class="flex justify-between items-center text-sm">
+        <a href="{{ url_for('auth.esqueci_senha') }}" class="text-red-400 hover:underline">Esqueceu a senha?</a>
+      </div>
+
+      <button type="submit" class="w-full bg-red-700 hover:bg-red-800 py-2 rounded font-semibold">
+        Entrar
+      </button>
+    </form>
+
+    <div class="pt-2 text-center text-sm">
+      <a href="{{ url_for('index') }}" class="text-red-400 hover:underline">Voltar para home</a>
+    </div>
+  </div>
+
+  <!-- ⏱ Toast Timeout -->
+  <script>
+    setTimeout(() => {
+      document.querySelectorAll('.toast').forEach(toast => {
+        toast.classList.add('opacity-0');
+        setTimeout(() => toast.remove(), 500);
+      });
+    }, 4000);
+  </script>
+
+  <!-- 👁 Toggle Senha -->
+  <script>
+    function toggleSenha() {
+      const senhaInput = document.getElementById('senha');
+      const eyeIcon = document.getElementById('eyeIcon');
+
+      if (senhaInput.type === 'password') {
+        senhaInput.type = 'text';
+        eyeIcon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.956 9.956 0 012.221-3.592M6.42 6.42A9.969 9.969 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.952 9.952 0 01-1.249 2.527M15 12a3 3 0 11-6 0 3 3 0 016 0zM3 3l18 18" />
+        `;
+      } else {
+        senhaInput.type = 'password';
+        eyeIcon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        `;
+      }
+    }
+  </script>
+
+</body>
+</html>

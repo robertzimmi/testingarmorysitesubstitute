@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Alterar Senha | 13Dominate</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen px-4 relative">
+
+  <!-- Toast container fixed no topo direito -->
+  <div id="toast-container" class="fixed top-5 right-5 space-y-2 z-50">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div 
+            class="max-w-xs px-4 py-3 rounded shadow-lg text-white
+              {% if category == 'success' %} bg-green-600 {% elif category == 'error' %} bg-red-600 {% elif category == 'warning' %} bg-yellow-500 {% else %} bg-blue-600 {% endif %}
+              animate-fade-in"
+            role="alert"
+          >
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <div class="w-full max-w-md bg-gray-800 rounded-lg shadow-lg p-8 space-y-6">
+    <div class="text-center">
+      <img src="{{ url_for('static', filename='img/13Dominate_Logo.svg') }}" alt="Logo" class="mx-auto h-12" />
+      <h2 class="text-2xl font-bold mt-4">Alterar senha</h2>
+      <p class="text-sm text-gray-400 mt-2">Troque a senha padrão por uma senha nova.</p>
+    </div>
+
+    <form action="{{ url_for('auth.alterar_senha') }}" method="POST" class="space-y-4">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <div>
+        <label class="block text-sm text-gray-300">Nova Senha</label>
+        <input
+          type="password"
+          name="nova_senha"
+          required
+          class="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+        />
+      </div>
+
+      <div>
+        <label class="block text-sm text-gray-300">Confirmar Nova Senha</label>
+        <input
+          type="password"
+          name="confirmar" id="confirmar"
+          required
+          class="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+        />
+      </div>
+
+      {% if erro %}
+        <p class="text-red-500 text-sm text-center">{{ erro }}</p>
+      {% endif %}
+
+      <button
+        type="submit"
+        class="w-full bg-red-700 hover:bg-red-800 py-2 rounded font-semibold"
+      >
+        Salvar nova senha
+      </button>
+    </form>
+
+    <div class="text-center text-sm">
+      <a href="{{ url_for('auth.logout') }}" class="text-red-400 hover:underline">Sair</a>
+    </div>
+  </div>
+
+  <script>
+    // Faz os toasts desaparecerem depois de 4 segundos com fade out
+    setTimeout(() => {
+      const toasts = document.querySelectorAll("#toast-container > div");
+      toasts.forEach((toast) => {
+        toast.style.transition = "opacity 0.5s ease";
+        toast.style.opacity = "0";
+        setTimeout(() => toast.remove(), 500);
+      });
+    }, 4000);
+  </script>
+
+  <style>
+    /* animação simples para fade in */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease forwards;
+    }
+  </style>
+</body>
+</html>

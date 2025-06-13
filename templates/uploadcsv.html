@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Torneio | 13Dominate{% endblock %}
+
+{% block content %}
+
+  <h1 class="text-2xl font-bold mb-6">Upload de Torneio</h1>
+
+  <form method="POST" action="{{ url_for('upload.upload_submit') }}" enctype="multipart/form-data" class="space-y-4 max-w-xl bg-gray-800 p-6 rounded shadow mx-auto">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div>
+      <label class="block text-gray-200 mb-1">Heroes CSV</label>
+      <input type="file" name="heroes" class="border p-2 w-full bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-red-600" required>
+    </div>
+
+    <div>
+      <label class="block text-gray-200 mb-1">Standings CSV</label>
+      <input type="file" name="standings" class="border p-2 w-full bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-red-600" required>
+    </div>
+
+    <div>
+      <label class="block text-gray-200 mb-1">Pairings CSV</label>
+      <input type="file" name="pairings" class="border p-2 w-full bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-red-600" required>
+    </div>
+
+    <div>
+      <label class="block text-gray-200 mb-1">Loja</label>
+      <select name="loja" class="border p-2 w-full bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-red-600" required>
+        <option value="">Escolha uma loja</option>
+        <option value="bolovo">Bolovo</option>
+        <option value="arena">Arena</option>
+        <option value="caverna">Caverna</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-gray-200 mb-1">Formato</label>
+      <select name="formato" class="border p-2 w-full bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-red-600" required>
+        <option value="">Escolha o formato</option>
+        <option value="commoner">Commoner</option>
+        <option value="blitz">Blitz</option>
+        <option value="cc">CC</option>
+        <option value="LivingLegends"disabled>LivingLegends</option>
+        <option value="UPF" disabled>UPF</option>
+        <option value="Project Blue" disabled>Project Blue</option>
+        <option value="Sealed" disabled>Sealed</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-gray-200 mb-1">Data</label>
+      <input type="date" name="data" class="border p-2 w-full bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-red-600" required>
+
+
+    </div>
+
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full">
+      Enviar
+    </button>
+  </form>
+{% endblock %}
+
