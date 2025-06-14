@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 from routes.calendar_routes import calendar_bp
 from routes.upload_routes import upload_bp
 from routes.auth_routes import auth_bp
+from box_integration.box_client import upload_to_box
+
 
 
 load_dotenv()
