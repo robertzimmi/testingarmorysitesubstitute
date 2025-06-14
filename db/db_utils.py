@@ -8,6 +8,7 @@ import time
 from io import StringIO
 import pandas as pd
 from flask import session, flash
+from datetime import datetime
 
 
 def connect_db():
@@ -149,3 +150,23 @@ def insert_calendar_entry(data, loja, cur):
         return "Evento adicionado ao calendário com sucesso!"
     else:
         return "Evento já existe no calendário. Nenhuma ação foi tomada."
+def get_box_tokens(cur):
+    """
+    Retorna access_token, refresh_token, client_id e client_secret da tabela token.
+    """
+    cur.execute("SELECT access_token, refresh_token, client_id, client_secret FROM token ORDER BY id DESC LIMIT 1")
+    row = cur.fetchone()
+    if row:
+        return row[0], row[1], row[2], row[3]
+    else:
+        return None, None, None, None
+
+def update_box_tokens(access_token, refresh_token, cur):
+    """
+    Atualiza access_token e refresh_token na tabela token.
+    """
+    usuario = session.get("usuario", "desconhecido")
+    cur.execute("""
+        UPDATE token SET access_token = %s, refresh_token = %s, updated_at = %s, usuario = %s
+        WHERE id = (SELECT id FROM token ORDER BY id DESC LIMIT 1)
+    """, (access_token, refresh_token, datetime.utcnow(), usuario))
