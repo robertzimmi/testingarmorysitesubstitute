@@ -1,10 +1,10 @@
 import os
+import json
 from boxsdk import OAuth2, Client
 
 TOKENS_PATH = 'box_tokens.json'  # Corrija aqui conforme o nome correto do arquivo
 
 def load_tokens():
-    import json
     if not os.path.exists(TOKENS_PATH):
         return None, None
     with open(TOKENS_PATH, 'r') as f:
@@ -12,9 +12,9 @@ def load_tokens():
         return data.get('access_token'), data.get('refresh_token')
 
 def save_tokens(access_token, refresh_token):
-    import json
     with open(TOKENS_PATH, 'w') as f:
         json.dump({'access_token': access_token, 'refresh_token': refresh_token}, f)
+    print(f"[TOKENS SALVOS] Novo access_token: {access_token[:8]}..., refresh_token: {refresh_token[:8]}...")
 
 def get_client():
     access_token, refresh_token = load_tokens()
@@ -28,7 +28,17 @@ def get_client():
         refresh_token=refresh_token,
         store_tokens=save_tokens
     )
+
     client = Client(oauth)
+
+    # 🧪 Forçar uma chamada para validar/renovar o token
+    try:
+        print("[DEBUG] Testando validade do token com chamada ao perfil do usuário Box...")
+        _ = client.user().get()  # Isso força a renovação se necessário
+    except Exception as e:
+        print(f"[Box] Erro ao validar token: {e}")
+        raise Exception("Token de acesso inválido ou expirado. Reautentique o app.")
+
     return client
 
 def upload_to_box(file_stream, filename, folder_name):
