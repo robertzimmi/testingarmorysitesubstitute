@@ -1,6 +1,7 @@
 from flask import Blueprint, request, current_app, render_template , redirect, url_for, flash, session
 from boxsdk import OAuth2
-from box_integration.box_client import save_tokens
+from box_integration.box_client import save_tokens_to_db
+
 from db.db_utils import connect_db, disconnect_db
 import bcrypt
 
@@ -24,7 +25,7 @@ def auth_callback():
         client_secret=current_app.config['BOX_CLIENT_SECRET']
     )
     access_token, refresh_token = oauth.authenticate(code)
-    save_tokens(access_token, refresh_token)
+    save_tokens_to_db(access_token, refresh_token)
     return "✅ Autenticado com sucesso! Tokens salvos."
 
 
