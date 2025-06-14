@@ -1,20 +1,36 @@
 import os
+import json
 from io import BytesIO
 from boxsdk import OAuth2, Client
 
+# Salva os tokens em um arquivo local
 def save_tokens(access_token, refresh_token):
-    pass  # Stub para evitar erro
+    print("🔄 Salvando novos tokens...")
+    token_data = {
+        "access_token": access_token,
+        "refresh_token": refresh_token
+    }
+    with open("box_tokens.json", "w") as f:
+        json.dump(token_data, f)
+    print("✅ Tokens salvos em 'box_tokens.json'.")
+
+# Carrega os tokens do arquivo ou das variáveis de ambiente
+def load_tokens():
+    try:
+        with open("box_tokens.json", "r") as f:
+            tokens = json.load(f)
+            return tokens["access_token"], tokens["refresh_token"]
+    except (FileNotFoundError, KeyError, json.JSONDecodeError):
+        return os.environ.get("BOX_ACCESS_TOKEN"), os.environ.get("BOX_REFRESH_TOKEN")
 
 def upload_to_box(file_stream: BytesIO, file_name: str, folder_name: str) -> str:
     print(f"🔄 Iniciando upload do arquivo '{file_name}' para a pasta '{folder_name}' no Box...")
 
-    # Tokens de ambiente
-    access_token = os.environ.get("BOX_ACCESS_TOKEN")
-    refresh_token = os.environ.get("BOX_REFRESH_TOKEN")
-
+    # Carrega tokens
+    access_token, refresh_token = load_tokens()
     if not access_token or not refresh_token:
-        print("❌ Tokens de acesso ou refresh não encontrados nas variáveis de ambiente.")
-        return "❌ BOX_ACCESS_TOKEN ou BOX_REFRESH_TOKEN não configurados nas variáveis de ambiente."
+        print("❌ Tokens de acesso ou refresh não encontrados.")
+        return "❌ BOX_ACCESS_TOKEN ou BOX_REFRESH_TOKEN não configurados ou salvos."
 
     print("🔐 Tokens carregados com sucesso.")
 
@@ -23,7 +39,7 @@ def upload_to_box(file_stream: BytesIO, file_name: str, folder_name: str) -> str
         client_secret=os.getenv("BOX_CLIENT_SECRET"),
         access_token=access_token,
         refresh_token=refresh_token,
-        store_tokens=lambda at, rt: print("🔄 Tokens atualizados (não salvos):", at[:10], "...", rt[:10])
+        store_tokens=save_tokens  # Agora salvando de verdade!
     )
 
     try:
