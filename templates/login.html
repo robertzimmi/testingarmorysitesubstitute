@@ -30,9 +30,6 @@
     <div class="text-center">
       <img src="{{ url_for('static', filename='img/13Dominate_Logo.svg') }}" alt="Logo" class="mx-auto h-12">
       <h2 class="text-2xl font-bold mt-4">Entrar na conta</h2>
-      <!-- DEBUG -->
-       <p>Usuário cookie: {{ usuario_cookie }}</p>
-<p>Lembrar: {{ lembrar }}</p>
     </div>
 
     <form action="{{ url_for('auth.login') }}" method="POST" class="space-y-4">
