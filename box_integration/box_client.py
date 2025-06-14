@@ -1,60 +1,51 @@
 import os
-import json
 from io import BytesIO
 from boxsdk import OAuth2, Client
+from db.db_utils import get_box_tokens, update_box_tokens
+from db.db_utils import connect_db, disconnect_db
 
-# Salva os tokens em arquivo local (útil para desenvolvimento)
-def save_tokens(access_token, refresh_token):
-    print("🔄 Salvando novos tokens localmente em 'box_tokens.json'...")
-    token_data = {
-        "access_token": access_token,
-        "refresh_token": refresh_token
-    }
-    with open("box_tokens.json", "w") as f:
-        json.dump(token_data, f)
-    print("✅ Tokens salvos localmente.")
-
-# Carrega tokens do arquivo local ou do environment group
-def load_tokens():
+def save_tokens_to_db(access_token, refresh_token):
+    conn = connect_db()
     try:
-        # Tenta carregar do arquivo local
-        with open("box_tokens.json", "r") as f:
-            tokens = json.load(f)
-            return tokens["access_token"], tokens["refresh_token"]
-    except (FileNotFoundError, KeyError, json.JSONDecodeError):
-        # Se não existir, carrega do environment group
-        return os.environ.get("BOX_ACCESS_TOKEN"), os.environ.get("BOX_REFRESH_TOKEN")
+        with conn.cursor() as cur:
+            update_box_tokens(access_token, refresh_token, cur)
+            conn.commit()
+            print("✅ Tokens atualizados no banco de dados.")
+    finally:
+        disconnect_db(conn)
+
+def load_tokens_from_db():
+    conn = connect_db()
+    try:
+        with conn.cursor() as cur:
+            return get_box_tokens(cur)
+    finally:
+        disconnect_db(conn)
 
 def upload_to_box(file_stream: BytesIO, file_name: str, folder_name: str) -> str:
     print(f"🔄 Iniciando upload do arquivo '{file_name}' para a pasta '{folder_name}' no Box...")
 
-    # Carrega tokens
-    access_token, refresh_token = load_tokens()
-    if not access_token or not refresh_token:
-        print("❌ Tokens de acesso ou refresh não encontrados.")
-        return "❌ BOX_ACCESS_TOKEN ou BOX_REFRESH_TOKEN não configurados ou salvos."
-
-    print("🔐 Tokens carregados com sucesso.")
+    access_token, refresh_token, client_id, client_secret = load_tokens_from_db()
+    if not all([access_token, refresh_token, client_id, client_secret]):
+        print("❌ Tokens ou credenciais não encontrados no banco.")
+        return "❌ Tokens ou credenciais não configurados no banco de dados."
 
     oauth = OAuth2(
-        client_id=os.getenv("BOX_CLIENT_ID"),
-        client_secret=os.getenv("BOX_CLIENT_SECRET"),
+        client_id=client_id,
+        client_secret=client_secret,
         access_token=access_token,
         refresh_token=refresh_token,
-        store_tokens=save_tokens  # Sempre que atualizar tokens, salva localmente (para dev)
+        store_tokens=save_tokens_to_db
     )
 
     try:
         client = Client(oauth)
         print("✅ Cliente Box inicializado.")
 
-        # Procurar ou criar pasta
-        print("📁 Verificando existência da pasta...")
         root_folder = client.folder('0')
         folder_id = None
 
         for item in root_folder.get_items():
-            print(f"📦 Item encontrado: {item.type} - {item.name}")
             if item.type == 'folder' and item.name == folder_name:
                 folder_id = item.id
                 print(f"✅ Pasta '{folder_name}' encontrada. ID: {folder_id}")
@@ -67,7 +58,6 @@ def upload_to_box(file_stream: BytesIO, file_name: str, folder_name: str) -> str
 
         folder = client.folder(folder_id)
 
-        # Verificar se o arquivo já existe
         existing_file = None
         for item in folder.get_items():
             if item.type == 'file' and item.name == file_name:
