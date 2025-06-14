@@ -3,24 +3,26 @@ import json
 from io import BytesIO
 from boxsdk import OAuth2, Client
 
-# Salva os tokens em um arquivo local
+# Salva os tokens em arquivo local (útil para desenvolvimento)
 def save_tokens(access_token, refresh_token):
-    print("🔄 Salvando novos tokens...")
+    print("🔄 Salvando novos tokens localmente em 'box_tokens.json'...")
     token_data = {
         "access_token": access_token,
         "refresh_token": refresh_token
     }
     with open("box_tokens.json", "w") as f:
         json.dump(token_data, f)
-    print("✅ Tokens salvos em 'box_tokens.json'.")
+    print("✅ Tokens salvos localmente.")
 
-# Carrega os tokens do arquivo ou das variáveis de ambiente
+# Carrega tokens do arquivo local ou do environment group
 def load_tokens():
     try:
+        # Tenta carregar do arquivo local
         with open("box_tokens.json", "r") as f:
             tokens = json.load(f)
             return tokens["access_token"], tokens["refresh_token"]
     except (FileNotFoundError, KeyError, json.JSONDecodeError):
+        # Se não existir, carrega do environment group
         return os.environ.get("BOX_ACCESS_TOKEN"), os.environ.get("BOX_REFRESH_TOKEN")
 
 def upload_to_box(file_stream: BytesIO, file_name: str, folder_name: str) -> str:
@@ -39,7 +41,7 @@ def upload_to_box(file_stream: BytesIO, file_name: str, folder_name: str) -> str
         client_secret=os.getenv("BOX_CLIENT_SECRET"),
         access_token=access_token,
         refresh_token=refresh_token,
-        store_tokens=save_tokens  # Agora salvando de verdade!
+        store_tokens=save_tokens  # Sempre que atualizar tokens, salva localmente (para dev)
     )
 
     try:
