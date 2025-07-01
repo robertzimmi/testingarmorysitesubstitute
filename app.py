@@ -9,7 +9,12 @@ from routes.calendar_routes import calendar_bp
 from routes.upload_routes import upload_bp
 from routes.auth_routes import auth_bp
 from box_integration.box_client import upload_to_box
+from routes.lista_routes import lista_bp
+from routes.api.lista_api import lista_api
+from routes.home_routes import home_bp
+from routes.api.topheroes import api_topheroes_bp
 
+from routes.api.topplayers import api_topplayers
 
 
 load_dotenv()
@@ -37,10 +42,16 @@ def base():
     return render_template('base.html')
 
 
+
+
+@app.route('/aprender')
+def aprender():
+    return render_template('aprender.html')
+
+
 @app.route('/esqueci_senha')
 def esqueci_senha():
     return render_template('esqueci_senha.html')
-
 
 
 @app.route('/uploadcsv')
@@ -80,6 +91,10 @@ def logout():
 app.register_blueprint(calendar_bp)   # prefixo definido no próprio blueprint
 app.register_blueprint(upload_bp)     # /upload
 app.register_blueprint(auth_bp)
-
+app.register_blueprint(lista_bp)
+app.register_blueprint(lista_api)
+app.register_blueprint(home_bp)
+app.register_blueprint(api_topheroes_bp)
+app.register_blueprint(api_topplayers)
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

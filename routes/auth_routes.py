@@ -69,7 +69,7 @@ def login():
                 else:
                     resp.set_cookie('usuario_cookie', '', expires=0)  # remove
 
-                flash('Login realizado com sucesso!', 'success')
+                #flash('Login realizado com sucesso!', 'success')
 
                 if precisa_trocar:
                     flash('Você precisa alterar sua senha antes de continuar.', 'warning')
@@ -152,7 +152,7 @@ def alterar_senha():
 @auth_bp.route('/logout')
 def logout():
     session.pop('usuario', None)  # Remove apenas o dado de login
-    flash('Você saiu da conta.', 'success')
+    flash('Você saiu da conta.', 'info')
     return redirect(url_for('index'))
 
 

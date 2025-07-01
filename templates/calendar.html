@@ -37,14 +37,15 @@
       $('#calendar').fullCalendar({
         locale: 'pt-br',
         header: {
-          left: 'prev,next today',
-          center: 'title',
-          right: 'month,agendaWeek,agendaDay'
-        },
-        defaultView: isMobile ? 'agendaDay' : 'month',
+  left: 'prev,next today',
+  center: 'title',
+  right: 'month'
+},
+        defaultView: isMobile ? 'month' : 'month',
         height: 'auto',
         editable: false,
         eventLimit: true,
+        displayEventTime: false,
         events: eventos
       });
     },
